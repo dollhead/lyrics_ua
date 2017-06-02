@@ -5,6 +5,7 @@ import re
 import sys
 
 site_url = 'http://nashe.com.ua/'
+lyrics_folder = 'lyrics'
 
 class Song(object):
     def __init__(self, name, url):
@@ -42,19 +43,23 @@ def fetch_and_write_lyrics(song, artist):
     soup = BeautifulSoup(html_doc, 'html.parser')
     lyrics = soup.find('div', {"id": "song2"})
 
-    with open(artist + '\\' + song.name + '.txt', 'w', encoding='utf-8') as f:
+    with open(lyrics_folder + '\\' + artist + '\\' + song.name + '.txt', 'w', encoding='utf-8') as f:
         f.write(lyrics.text)
 
 def fetch_lyrics(artist, songs):
     fetched, not_fetched = [], []
-    if not os.path.exists(artist):
-        os.makedirs(artist)
+    artist_dir = os.path.join(lyrics_folder, artist)
+    if not os.path.exists(artist_dir):
+        os.makedirs(artist_dir)
 
     for song in songs:
         try:
             fetch_and_write_lyrics(song, artist)
             fetched.append(song)
         except:
-            print("Catched exception when fetching lyrics for " + song.name + sys.exc_info()[0])
             not_fetched.append(song)
     return fetched, not_fetched
+
+def fetch_all_lyrics(artist_url):
+    artist, songs = get_artist_songs(artist_url)
+    return fetch_lyrics(artist, songs)
